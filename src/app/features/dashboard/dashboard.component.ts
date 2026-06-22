@@ -432,13 +432,9 @@ import { KzPipe } from '../../shared/pipes/kz.pipe';
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 16px;
 
-      @media (max-width: 520px) {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-
-      @media (max-width: 340px) {
+      @media (max-width: 640px) {
         grid-template-columns: 1fr;
+        gap: 12px;
       }
     }
 
@@ -539,6 +535,9 @@ import { KzPipe } from '../../shared/pipes/kz.pipe';
       white-space: nowrap;
       backdrop-filter: blur(10px);
       box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      max-width: calc(100vw - 90px);
+      overflow: hidden;
+      text-overflow: ellipsis;
 
       &.inactive {
         border-color: rgba(255,255,255,0.07);
