@@ -6,7 +6,7 @@
 
 ---
 
-## Português
+## PT
 
 ### O que é o KumbuFlow?
 
@@ -65,7 +65,7 @@ Quando começar um novo mês, clica em **Reset Mensal** no header para reiniciar
 | SCSS | — | Estilos com tema escuro |
 | Angular Signals | — | Gestão de estado reactivo |
 
-- **Sem backend** — Todos os dados são estáticos (em memória). Não há base de dados nem autenticação.
+- **Sem backend** — Todos os dados são estáticos. Não há base de dados nem autenticação.
 - **Standalone components** — Arquitectura moderna Angular sem NgModules.
 - **Hash routing** — Compatível com GitHub Pages.
 
@@ -84,26 +84,6 @@ npm install
 # Iniciar servidor de desenvolvimento
 ng serve
 ```
-
-Abre o browser em `http://localhost:4200/`.
-
-### Build e deploy para GitHub Pages
-
-```bash
-# Build com o base-href correcto
-ng build --base-href "/KumbuFlow/"
-
-# Publicar no GitHub Pages
-npx angular-cli-ghpages --dir=dist/money-flow/browser
-```
-
----
-
-### Desenvolvido por
-
-**A_man_dio IV** — Desenvolvedor angolano
-
----
 
 ---
 
@@ -185,21 +165,3 @@ npm install
 # Start development server
 ng serve
 ```
-
-Open your browser at `http://localhost:4200/`.
-
-### Build and deploy to GitHub Pages
-
-```bash
-# Build with the correct base-href
-ng build --base-href "/KumbuFlow/"
-
-# Publish to GitHub Pages
-npx angular-cli-ghpages --dir=dist/money-flow/browser
-```
-
----
-
-### Developed by
-
-**A_man_dio IV** — Angolan developer
