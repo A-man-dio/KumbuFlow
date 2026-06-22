@@ -87,7 +87,7 @@ ng serve
 
 ---
 
-## English
+## EN
 
 ### What is KumbuFlow?
 
