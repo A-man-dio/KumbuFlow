@@ -258,7 +258,8 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
     .detail-header {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
       margin-bottom: 28px;
     }
 
@@ -310,6 +311,12 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
       white-space: nowrap;
 
       &:hover { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.4); }
+
+      @media (max-width: 500px) {
+        flex: 0 0 100%;
+        margin-left: 0;
+        justify-content: center;
+      }
     }
 
     /* ── Alloc modal styles ── */
@@ -564,6 +571,7 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
       gap: 28px;
       margin-bottom: 36px;
       align-items: start;
+      overflow: visible;
 
       @media (max-width: 560px) {
         grid-template-columns: 1fr;
@@ -577,6 +585,7 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: visible;
 
       @media (max-width: 560px) {
         width: 180px;
@@ -1003,6 +1012,16 @@ export class FlowDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     const f = this.flow();
     if (!f || !this.chartCanvas || f.transactions.length === 0) return;
 
+    if (!(Tooltip.positioners as any)['outerArc']) {
+      (Tooltip.positioners as any)['outerArc'] = function(this: any, elements: any[]) {
+        if (!elements.length) return false;
+        const arc = elements[0].element as any;
+        const midAngle = (arc.startAngle + arc.endAngle) / 2;
+        const r = arc.outerRadius + 20;
+        return { x: arc.x + Math.cos(midAngle) * r, y: arc.y + Math.sin(midAngle) * r };
+      };
+    }
+
     const totals: Record<string, number> = {};
     for (const tx of f.transactions) {
       totals[tx.category] = (totals[tx.category] ?? 0) + tx.amount;
@@ -1037,6 +1056,7 @@ export class FlowDetailComponent implements OnInit, AfterViewInit, OnDestroy {
         plugins: {
           legend: { display: false },
           tooltip: {
+            position: 'outerArc' as any,
             backgroundColor: '#111827',
             borderColor: 'rgba(255,255,255,0.1)',
             borderWidth: 1,

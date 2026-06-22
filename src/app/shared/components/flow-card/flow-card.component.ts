@@ -70,7 +70,7 @@ interface Bubble {
 
       <!-- Action menu overlay -->
       @if (showMenu()) {
-        <div class="action-overlay" (click)="$event.stopPropagation()">
+        <div class="action-overlay" (click)="closeOverlay($event)">
           @if (!flow.isActive) {
             <button class="menu-btn primary" (click)="onActivate()">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -386,6 +386,11 @@ export class FlowCardComponent implements OnInit, OnChanges, OnDestroy {
   @HostListener('document:click')
   closeMenu(): void {
     if (activeCardMenuId() === this.flow.id) activeCardMenuId.set(null);
+  }
+
+  closeOverlay(event: Event): void {
+    event.stopPropagation();
+    activeCardMenuId.set(null);
   }
 
   toggleMenu(event: Event): void {
