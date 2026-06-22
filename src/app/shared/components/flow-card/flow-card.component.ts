@@ -1,9 +1,12 @@
 import {
   Component, Input, Output, EventEmitter, OnInit, OnChanges,
-  OnDestroy, SimpleChanges, HostListener, signal, ChangeDetectionStrategy
+  OnDestroy, SimpleChanges, HostListener, signal, computed, ChangeDetectionStrategy
 } from '@angular/core';
 import { Flow } from '../../../core/models/flow.model';
 import { KzPipe } from '../../pipes/kz.pipe';
+
+// Shared across all FlowCardComponent instances — only one menu open at a time
+const activeCardMenuId = signal<string | null>(null);
 
 interface Bubble {
   id: number;
@@ -333,7 +336,7 @@ export class FlowCardComponent implements OnInit, OnChanges, OnDestroy {
   @Output() remove = new EventEmitter<string>();
 
   displayPct = signal(0);
-  showMenu = signal(false);
+  readonly showMenu = computed(() => activeCardMenuId() === this.flow.id);
 
   private animFrame?: number;
 
@@ -382,32 +385,32 @@ export class FlowCardComponent implements OnInit, OnChanges, OnDestroy {
 
   @HostListener('document:click')
   closeMenu(): void {
-    if (this.showMenu()) this.showMenu.set(false);
+    if (activeCardMenuId() === this.flow.id) activeCardMenuId.set(null);
   }
 
   toggleMenu(event: Event): void {
     event.stopPropagation();
-    this.showMenu.update(v => !v);
+    activeCardMenuId.set(activeCardMenuId() === this.flow.id ? null : this.flow.id);
   }
 
   onActivate(): void {
     this.activate.emit(this.flow.id);
-    this.showMenu.set(false);
+    activeCardMenuId.set(null);
   }
 
   onDeactivate(): void {
     this.deactivate.emit();
-    this.showMenu.set(false);
+    activeCardMenuId.set(null);
   }
 
   onViewDetails(): void {
     this.viewDetails.emit(this.flow.id);
-    this.showMenu.set(false);
+    activeCardMenuId.set(null);
   }
 
   onRemove(): void {
     this.remove.emit(this.flow.id);
-    this.showMenu.set(false);
+    activeCardMenuId.set(null);
   }
 
   private animateCounter(from: number, to: number): void {
