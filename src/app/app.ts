@@ -3,6 +3,18 @@ import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { AlertComponent } from './shared/components/alert/alert.component';
 
+/**
+ * Root component — the shell that wraps the entire application.
+ *
+ * Layout (top to bottom):
+ *   <app-navbar>   — sticky header with logo, month badge, and action buttons
+ *   <router-outlet> — lazy-loaded page content (Dashboard or FlowDetail)
+ *   <app-alert>    — global overlay layer for toasts and confirm dialogs
+ *   <footer>       — developer signature, always visible at the bottom
+ *
+ * AlertComponent is placed at root level so its toasts and dialogs appear
+ * above all page content regardless of which route is active.
+ */
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -35,6 +47,7 @@ import { AlertComponent } from './shared/components/alert/alert.component';
       gap: 8px;
     }
 
+    /* "Dev by" label — small, muted */
     .footer-dev {
       font-family: 'Inter', sans-serif;
       font-size: 0.65rem;
@@ -44,6 +57,7 @@ import { AlertComponent } from './shared/components/alert/alert.component';
       letter-spacing: 0.12em;
     }
 
+    /* Developer signature in JetBrains Mono — blue highlight */
     .footer-name {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.82rem;
@@ -52,6 +66,7 @@ import { AlertComponent } from './shared/components/alert/alert.component';
       letter-spacing: 0.04em;
     }
 
+    /* " IV" suffix in a lighter grey */
     .footer-suffix {
       font-weight: 400;
       color: #64748B;

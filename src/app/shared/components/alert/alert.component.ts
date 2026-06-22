@@ -1,20 +1,37 @@
 import { Component, inject } from '@angular/core';
 import { AlertService } from '../../../core/services/alert.service';
 
+/**
+ * Global overlay component for notifications.
+ *
+ * Renders two UI layers on top of all page content:
+ *   1. Toast stack — ephemeral banners in the top-right corner.
+ *   2. Confirm dialog — a blocking modal that requires the user to choose.
+ *
+ * Placed once in <app-root> so it sits above every routed page. It reads
+ * directly from AlertService's signals and re-renders automatically when
+ * the signal values change.
+ *
+ * z-index hierarchy:
+ *   page content  → 0
+ *   page modals   → 200
+ *   confirm dialog→ 500
+ *   toasts        → 1000  (always visible above everything)
+ */
 @Component({
   selector: 'app-alert',
   standalone: true,
   template: `
-    <!-- Toasts -->
+    <!-- ── Toast stack ── -->
     <div class="toast-stack">
       @for (toast of alertService.toasts(); track toast.id) {
         <div class="toast" [class]="'toast-' + toast.type">
           <span class="toast-icon">
             @switch (toast.type) {
               @case ('success') { ✓ }
-              @case ('error') { ✕ }
+              @case ('error')   { ✕ }
               @case ('warning') { ⚠ }
-              @default { ℹ }
+              @default          { ℹ }
             }
           </span>
           <span class="toast-msg">{{ toast.message }}</span>
@@ -22,9 +39,11 @@ import { AlertService } from '../../../core/services/alert.service';
       }
     </div>
 
-    <!-- Confirm dialog -->
+    <!-- ── Confirm dialog ── -->
+    <!-- Clicking the backdrop dismisses without confirming -->
     @if (alertService.confirmOptions(); as opts) {
       <div class="confirm-backdrop" (click)="alertService.dismissConfirm()">
+        <!-- stopPropagation prevents the backdrop click from closing when clicking inside the box -->
         <div class="confirm-box" (click)="$event.stopPropagation()">
           <p class="confirm-title">{{ opts.title }}</p>
           <p class="confirm-msg">{{ opts.message }}</p>
@@ -32,6 +51,7 @@ import { AlertService } from '../../../core/services/alert.service';
             <button class="confirm-cancel" (click)="alertService.dismissConfirm()">
               {{ opts.cancelLabel ?? 'Cancelar' }}
             </button>
+            <!-- danger class turns the button red for destructive actions -->
             <button class="confirm-ok" [class.danger]="opts.danger" (click)="alertService.acceptConfirm()">
               {{ opts.confirmLabel ?? 'Confirmar' }}
             </button>
@@ -44,13 +64,13 @@ import { AlertService } from '../../../core/services/alert.service';
     /* ── Toasts ── */
     .toast-stack {
       position: fixed;
-      top: 72px;
+      top: 72px; /* sits just below the 60px navbar */
       right: 20px;
       z-index: 1000;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      pointer-events: none;
+      pointer-events: none; /* toasts never block clicks on the page */
     }
 
     .toast {
@@ -97,6 +117,7 @@ import { AlertService } from '../../../core/services/alert.service';
 
     .toast-msg { line-height: 1.4; }
 
+    /* Slide in from the right */
     @keyframes toast-in {
       from { opacity: 0; transform: translateX(20px) scale(0.95); }
       to   { opacity: 1; transform: translateX(0) scale(1); }
@@ -190,5 +211,6 @@ import { AlertService } from '../../../core/services/alert.service';
   `]
 })
 export class AlertComponent {
+  /** Exposed as protected so the inline template can access service methods directly. */
   protected alertService = inject(AlertService);
 }
