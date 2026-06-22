@@ -1,0 +1,227 @@
+<div class="dashboard">
+
+  <!-- Hero Balance -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-top-row">
+        <p class="hero-label">Saldo do Cartão</p>
+        <button class="hero-edit-btn" (click)="openBalanceModal()" title="Editar saldo do cartão">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Editar
+        </button>
+      </div>
+      <h1 class="hero-balance">{{ flowService.cardBalance() | kz }}</h1>
+
+      <div class="hero-alloc-bar">
+        <div class="alloc-fill" [style.width.%]="allocPct"></div>
+      </div>
+
+      <div class="hero-meta">
+        <span class="meta-item">
+          <span class="dot blue"></span>
+          Alocado: {{ flowService.totalAllocated() | kz }}
+        </span>
+        <span class="meta-divider">•</span>
+        <span class="meta-item">
+          <span class="dot green"></span>
+          Livre: {{ flowService.availableToAllocate() | kz }}
+        </span>
+      </div>
+    </div>
+    <div class="hero-glow"></div>
+  </section>
+
+  <!-- Edit Card Balance Modal -->
+  @if (showBalanceModal()) {
+    <div class="modal-backdrop" (click)="closeBalanceModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <p class="modal-label">Saldo do Cartão</p>
+            <p class="modal-flow-name">Define o valor total disponível no teu cartão</p>
+          </div>
+          <button class="modal-close" (click)="closeBalanceModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="field">
+            <label>Valor no Cartão (Kz) *</label>
+            <div class="input-wrap">
+              <input type="number" [(ngModel)]="balanceInput" placeholder="0" min="1" class="field-input" />
+              <span class="input-suffix">Kz</span>
+            </div>
+          </div>
+          @if (balanceError()) {
+            <p class="modal-error">{{ balanceError() }}</p>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" (click)="closeBalanceModal()">Cancelar</button>
+          <button class="btn-submit" (click)="submitBalance()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Active Flow Banner -->
+  @if (flowService.activeFlow(); as active) {
+    <section class="active-banner">
+      <div class="banner-left">
+        <span class="banner-icon">{{ active.icon }}</span>
+        <div>
+          <p class="banner-label">Fluxo Activo</p>
+          <p class="banner-name">{{ active.name }}</p>
+        </div>
+      </div>
+      <div class="banner-right">
+        <span class="banner-amount">{{ active.totalAmount - active.spentAmount | kz }}</span>
+        <span class="banner-sub">disponível</span>
+      </div>
+    </section>
+  }
+
+  <!-- Flow Grid -->
+  <section class="flows-section">
+    <h2 class="section-title">
+      Meus Fluxos
+      <span class="count-badge">{{ flowCount }}</span>
+    </h2>
+
+    <div class="flows-grid">
+      @for (flow of flowService.flows(); track flow.id) {
+        <app-flow-card
+          [flow]="flow"
+          (activate)="onActivate($event)"
+          (deactivate)="onDeactivate()"
+          (viewDetails)="onViewDetails($event)"
+          (remove)="onRemove($event)"
+        />
+      }
+      <button class="add-flow-card" (click)="openCreateModal()">
+        <div class="add-flow-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </div>
+        <span class="add-flow-label">Novo Fluxo</span>
+      </button>
+    </div>
+  </section>
+
+</div>
+
+<!-- FAB -->
+<div class="fab-container">
+  @if (flowService.activeFlow(); as active) {
+    <div class="fab-label">
+      <span>{{ active.icon }} Gasto em {{ active.name }}</span>
+    </div>
+  } @else {
+    <div class="fab-label inactive">Activa um fluxo primeiro</div>
+  }
+  <button class="fab" (click)="openExpenseModal()" [class.disabled]="!flowService.activeFlow()" [class.fab-ok]="fabSuccess()">
+    @if (fabSuccess()) {
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+    } @else {
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    }
+  </button>
+</div>
+
+<!-- Create Flow Modal -->
+@if (showCreateModal()) {
+  <div class="modal-backdrop" (click)="closeCreateModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <p class="modal-label">Novo Fluxo</p>
+          <p class="modal-flow-name">Define o nome, ícone e valor</p>
+        </div>
+        <button class="modal-close" (click)="closeCreateModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Nome do Fluxo *</label>
+          <input type="text" [(ngModel)]="newFlowName" placeholder="Ex: Alimentação, Renda, Lazer…" class="field-input" />
+        </div>
+        <div class="field">
+          <label>Ícone</label>
+          <div class="icon-grid">
+            @for (em of iconOptions; track em) {
+              <button class="icon-btn" [class.selected]="newFlowIcon === em" (click)="newFlowIcon = em">{{ em }}</button>
+            }
+          </div>
+        </div>
+        <div class="field">
+          <label>Valor Alocado (Kz) *</label>
+          <div class="input-wrap">
+            <input type="number" [(ngModel)]="newFlowAmount" placeholder="0" min="1" class="field-input" />
+            <span class="input-suffix">Kz</span>
+          </div>
+        </div>
+        @if (createError()) {
+          <p class="modal-error">{{ createError() }}</p>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeCreateModal()">Cancelar</button>
+        <button class="btn-submit" (click)="submitCreate()">Criar Fluxo</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Expense Modal -->
+@if (showModal()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <p class="modal-label">Registar Gasto</p>
+          @if (flowService.activeFlow(); as active) {
+            <p class="modal-flow-name">{{ active.icon }} {{ active.name }}</p>
+          }
+        </div>
+        <button class="modal-close" (click)="closeModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (flowService.activeFlow(); as active) {
+          <div class="available-hint">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Disponível em <strong>{{ active.name }}</strong>: <span class="hint-amount">{{ active.totalAmount - active.spentAmount | kz }}</span>
+          </div>
+        }
+
+        <div class="field">
+          <label>Valor (Kz) *</label>
+          <div class="input-wrap">
+            <input type="number" [(ngModel)]="expenseAmount" placeholder="0" min="1" class="field-input" />
+            <span class="input-suffix">Kz</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Descrição *</label>
+          <input type="text" [(ngModel)]="expenseDescription" placeholder="Ex: Supermercado Kero" class="field-input" />
+        </div>
+
+        @if (modalError()) {
+          <p class="modal-error">{{ modalError() }}</p>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeModal()">Cancelar</button>
+        <button class="btn-submit" (click)="submitExpense()">Registar Gasto</button>
+      </div>
+    </div>
+  </div>
+}

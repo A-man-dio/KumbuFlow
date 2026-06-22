@@ -1,0 +1,37 @@
+<!-- ── Toast stack ── -->
+<div class="toast-stack">
+  @for (toast of alertService.toasts(); track toast.id) {
+    <div class="toast" [class]="'toast-' + toast.type">
+      <span class="toast-icon">
+        @switch (toast.type) {
+          @case ('success') { ✓ }
+          @case ('error')   { ✕ }
+          @case ('warning') { ⚠ }
+          @default          { ℹ }
+        }
+      </span>
+      <span class="toast-msg">{{ toast.message }}</span>
+    </div>
+  }
+</div>
+
+<!-- ── Confirm dialog ── -->
+<!-- Clicking the backdrop dismisses without confirming -->
+@if (alertService.confirmOptions(); as opts) {
+  <div class="confirm-backdrop" (click)="alertService.dismissConfirm()">
+    <!-- stopPropagation prevents the backdrop click from closing when clicking inside the box -->
+    <div class="confirm-box" (click)="$event.stopPropagation()">
+      <p class="confirm-title">{{ opts.title }}</p>
+      <p class="confirm-msg">{{ opts.message }}</p>
+      <div class="confirm-actions">
+        <button class="confirm-cancel" (click)="alertService.dismissConfirm()">
+          {{ opts.cancelLabel ?? 'Cancelar' }}
+        </button>
+        <!-- danger class turns the button red for destructive actions -->
+        <button class="confirm-ok" [class.danger]="opts.danger" (click)="alertService.acceptConfirm()">
+          {{ opts.confirmLabel ?? 'Confirmar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

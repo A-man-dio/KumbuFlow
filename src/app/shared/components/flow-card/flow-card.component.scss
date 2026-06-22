@@ -1,0 +1,251 @@
+.flow-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #0f1629;
+  border: 1.5px solid rgba(255, 255, 255, 0.06);
+  min-height: 220px;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s, border-color 0.4s;
+  user-select: none;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Blue ring highlights the active flow */
+  &.is-active {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6, 0 20px 60px rgba(59, 130, 246, 0.15);
+  }
+}
+
+/* Content sits above the water (z-index 10 vs water z-index 1) */
+.card-content {
+  position: relative;
+  z-index: 10;
+  padding: 18px 20px 14px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none; /* clicks fall through to the .flow-card div */
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+.flow-identity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flow-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.flow-name {
+  font-family: 'Space Grotesk', sans-serif;
+  color: #f1f5f9;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.active-badge {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #4ade80;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.1em;
+}
+
+.total-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 16px;
+}
+
+/* margin-top: auto pushes the percentage to the bottom of the card */
+.pct-display {
+  margin-top: auto;
+  line-height: 1;
+}
+
+.pct-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 3.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
+}
+
+.pct-symbol {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.5);
+  margin-left: 2px;
+}
+
+.remaining-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 6px;
+}
+
+/* ── Water animation ── */
+
+/* The fill div's height is bound to remainingPct — it rises/falls
+   with a spring-like easing (cubic-bezier) for a natural water effect */
+.water-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transition: height 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 1;
+}
+
+/* Wave container: 200% wide so the SVGs can scroll left by 50%
+   creating a seamless loop (the path repeats exactly at 50%) */
+.wave-container {
+  position: absolute;
+  top: -38px; /* negative offset so the wave crests above the water body */
+  left: 0;
+  right: 0;
+  height: 50px;
+  overflow: hidden;
+}
+
+svg.wave {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%; /* double-wide for the seamless scroll trick */
+  height: 50px;
+
+  path { transition: fill 1.2s ease; }
+
+  /* wave-1 scrolls at 4 s, wave-2 goes reverse at 7 s — the different
+     speeds prevent perfect synchronisation for a more organic look */
+  &.wave-1 { animation: wave-move 4s linear infinite; }
+  &.wave-2 { animation: wave-move 7s linear infinite reverse; top: 6px; }
+}
+
+/* Solid body of water below the wave crest */
+.water-body {
+  position: absolute;
+  top: 12px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  transition: background-color 1.2s ease;
+}
+
+/* Individual bubbles — duration and delay are CSS custom properties
+   set per-element from the pre-computed bubbles array */
+.bubble {
+  position: absolute;
+  bottom: 5%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  animation: bubble-rise var(--dur, 3s) var(--delay, 0s) ease-in infinite;
+}
+
+/* Scroll the SVG path left by exactly half its width to loop seamlessly */
+@keyframes wave-move {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes bubble-rise {
+  0%   { transform: translateY(0) scale(0.5); opacity: 0; }
+  15%  { opacity: 0.6; transform: scale(1); }
+  85%  { opacity: 0.25; }
+  100% { transform: translateY(-180px) scale(0.7); opacity: 0; }
+}
+
+/* ── Action overlay ── */
+.action-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20; /* above card content (10) and water (1) */
+  background: rgba(8, 12, 20, 0.88);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  animation: fade-in 0.18s ease;
+}
+
+.menu-btn {
+  width: 100%;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.1s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &:active { transform: scale(0.97); }
+
+  &.primary {
+    background: #3b82f6;
+    color: #fff;
+    &:hover { background: #2563eb; }
+  }
+
+  &.secondary {
+    background: rgba(255, 255, 255, 0.07);
+    color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    &:hover { background: rgba(255, 255, 255, 0.12); }
+  }
+
+  &.danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    &:hover { background: rgba(239, 68, 68, 0.18); }
+  }
+
+  &.remove {
+    background: transparent;
+    color: #64748b;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.78rem;
+    padding: 8px 16px;
+    &:hover {
+      background: rgba(239, 68, 68, 0.08);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

@@ -1,0 +1,77 @@
+<div class="flow-card" [class.is-active]="flow.isActive" [class.menu-open]="showMenu()" (click)="toggleMenu($event)">
+
+  <!-- Text content — pointer-events: none lets clicks reach the card below -->
+  <div class="card-content">
+    <div class="card-top">
+      <div class="flow-identity">
+        <span class="flow-icon">{{ flow.icon }}</span>
+        <span class="flow-name">{{ flow.name }}</span>
+      </div>
+      @if (flow.isActive) {
+        <span class="active-badge">ATIVO</span>
+      }
+    </div>
+
+    <div class="total-label">{{ flow.totalAmount | kz }}</div>
+
+    <!-- Animated percentage counter — updated via requestAnimationFrame -->
+    <div class="pct-display">
+      <span class="pct-value">{{ displayPct() }}</span><span class="pct-symbol">%</span>
+    </div>
+    <div class="remaining-value">{{ remainingAmount | kz }} restantes</div>
+  </div>
+
+  <!-- Water fill: height = remainingPct, colour = waterColor -->
+  <div class="water-fill" [style.height.%]="remainingPct">
+    <!-- Two overlapping SVG sine waves scrolling at different speeds
+         create the illusion of a real water surface -->
+    <div class="wave-container">
+      <svg class="wave wave-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" preserveAspectRatio="none">
+        <path [style.fill]="waterColor" d="M0,25 C25,5 75,45 100,25 C125,5 175,45 200,25 V50 H0 Z" opacity="0.75"/>
+      </svg>
+      <svg class="wave wave-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" preserveAspectRatio="none">
+        <path [style.fill]="waterColor" d="M0,30 C30,10 70,50 100,30 C130,10 170,50 200,30 V50 H0 Z" opacity="0.45"/>
+      </svg>
+    </div>
+    <!-- Solid water body below the waves, with rising bubbles -->
+    <div class="water-body" [style.background-color]="waterColor">
+      @for (b of bubbles; track b.id) {
+        <div class="bubble"
+          [style.left.%]="b.x"
+          [style.width.px]="b.size"
+          [style.height.px]="b.size"
+          [style.--dur]="b.duration + 's'"
+          [style.--delay]="b.delay + 's'">
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Action menu — rendered over the card when showMenu() is true.
+       Clicking any part of the overlay (including empty space) calls
+       closeOverlay(), which stops propagation and closes the menu. -->
+  @if (showMenu()) {
+    <div class="action-overlay" (click)="closeOverlay($event)">
+      @if (!flow.isActive) {
+        <button class="menu-btn primary" (click)="onActivate()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Ativar Fluxo
+        </button>
+      }
+      <button class="menu-btn secondary" (click)="onViewDetails()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Ver Detalhes
+      </button>
+      @if (flow.isActive) {
+        <button class="menu-btn danger" (click)="onDeactivate()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="6" y="6" width="12" height="12"/></svg>
+          Desativar
+        </button>
+      }
+      <button class="menu-btn remove" (click)="onRemove()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Remover Fluxo
+      </button>
+    </div>
+  }
+</div>
